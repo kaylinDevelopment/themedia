@@ -35,7 +35,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -69,16 +69,37 @@
      </widget>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
-       <string>CD</string>
+       <string>CD/DVD</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QRadioButton" name="CdRadio">
+         <property name="text">
+          <string>CD</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="DvdRadio">
+         <property name="text">
+          <string>D&amp;VD</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="deviceLine">
+         <property name="inputMask">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string>Device to open from (Leave this blank if you don't know)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Coming Soon!</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Playing a CD/DVD will clear the current playlist. &lt;/p&gt;&lt;p&gt;DVD Playback is &lt;span style=&quot; font-weight:600;&quot;&gt;very flaky.&lt;/span&gt; theMedia may crash at any given point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
@@ -107,7 +128,8 @@
         <string>Browse for Files</string>
        </property>
        <property name="icon">
-        <iconset theme="document-open"/>
+        <iconset theme="document-open">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -117,7 +139,8 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="dialog-cancel"/>
+        <iconset theme="dialog-cancel">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -127,7 +150,8 @@
         <string>OK</string>
        </property>
        <property name="icon">
-        <iconset theme="dialog-ok"/>
+        <iconset theme="dialog-ok">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>

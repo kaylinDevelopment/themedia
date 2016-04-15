@@ -7,70 +7,224 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    this->setMouseTracking(true);
+    ui->VideoWidget->installEventFilter(this);
+    ui->VideoWidget->setMouseTracking(true);
+
     ui->artistImage->setPixmap(QIcon::fromTheme("view-media-artist").pixmap(16, 16));
     ui->albumImage->setPixmap(QIcon::fromTheme("media-album-cover").pixmap(16, 16));
     ui->trackImage->setPixmap(QIcon::fromTheme("gtk-cdrom").pixmap(16, 16));
+    ui->VideoWidget->setVisible(false);
+    ui->dvdControls->setVisible(false);
+    ui->cddbProgressFrame->setVisible(false);
 
     player = new MediaObject(this);
     createPath(player, new AudioOutput(Phonon::MusicCategory, this));
+    createPath(player, ui->VideoWidget);
 
     connect(player, &MediaObject::metaDataChanged, [=]() {
-        bool showNotification = false;
-        QStringList Title = player->metaData(Phonon::TitleMetaData);
-        if (Title.count() > 0) {
-            if (Title.at(0) != ui->title->text()) {
-                showNotification = true;
-                ui->title->setText(Title.at(0));
+        if (playlist.first().type() == MediaSource::Disc) {
+
+            if (playlist.first().discType() == Phonon::Cd && cddbinfo.count() == 0) {
+                ui->cddbProgressFrame->setVisible(true);
+
+                //Read data from Musicbrainz
+                QStringList discid = player->metaData(Phonon::MusicBrainzDiscIdMetaData);
+                if (discid.count() > 0) {
+                    QThread *thread = new QThread;
+                    CddbWorker *worker = new CddbWorker(&cddbinfo, discid, this);
+                    worker->moveToThread(thread);
+                    connect(thread, SIGNAL (started()), worker, SLOT (process()));
+                    connect(worker, SIGNAL (finished()), thread, SLOT (quit()));
+                    connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
+                    connect(thread, SIGNAL (finished()), thread, SLOT (deleteLater()));
+                    connect(worker, &CddbWorker::finished, [=]() {
+                        on_controller_availableTitlesChanged(controller->availableTitles());
+                        on_controller_titleChanged(controller->currentTitle());
+                        ui->cddbProgressFrame->setVisible(false);
+                    });
+                    thread->start();
+                }
             }
-        }
 
-        QStringList Artist = player->metaData(Phonon::ArtistMetaData);
-        if (Artist.count() > 0) {
-            if (Artist.at(0) != ui->artist->text()) {
-                showNotification = true;
-                ui->artist->setText(Artist.at(0));
+        } else {
+            ui->artist->setVisible(true);
+            ui->artistImage->setVisible(true);
+            ui->albumImage->setVisible(true);
+            ui->albumImage->setVisible(true);
+
+            bool showNotification = false;
+            QStringList Title = player->metaData(Phonon::TitleMetaData);
+            if (Title.count() > 0) {
+                if (Title.at(0) != ui->title->text()) {
+                    showNotification = true;
+                    ui->title->setText(Title.at(0));
+                }
             }
-        }
 
-        QStringList Album = player->metaData(Phonon::AlbumMetaData);
-        if (Album.count() > 0) {
-            ui->album->setText(Album.at(0));
-        }
+            QStringList Artist = player->metaData(Phonon::ArtistMetaData);
+            if (Artist.count() > 0) {
+                if (Artist.at(0) != ui->artist->text()) {
+                    showNotification = true;
+                    ui->artist->setText(Artist.at(0));
+                }
+            }
 
-        QStringList Track = player->metaData(Phonon::TracknumberMetaData);
-        if (Track.count() > 0) {
-            ui->track->setText(Track.at(0));
-        }
+            QStringList Album = player->metaData(Phonon::AlbumMetaData);
+            if (Album.count() > 0) {
+                ui->album->setText(Album.at(0));
+            }
 
-        updatePlaylist();
+            QStringList Track = player->metaData(Phonon::TracknumberMetaData);
+            if (Track.count() > 0) {
+                ui->track->setText(Track.at(0));
+                ui->track->setVisible(true);
+                ui->trackImage->setVisible(true);
+            } else {
+                ui->trackImage->setVisible(false);
+                ui->trackImage->setVisible(false);
+            }
 
-        if (showNotification) {
-            QDBusInterface interface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
-            //QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications/", "org.freedesktop.Notifications", "Notify");
+            updatePlaylist();
 
-            QList<QVariant> args;
-            args << "theMedia"<< (uint) 0 << "media-playback-start" << "theMedia" <<
-                                    "Now Playing: " + ui->title->text() + " by " + ui->artist->text() <<
-                                    QStringList() << QVariantMap() << (int) -1;
+            if (showNotification) {
+                QDBusInterface interface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
+                //QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications/", "org.freedesktop.Notifications", "Notify");
 
-            QDBusMessage message = interface.callWithArgumentList(QDBus::AutoDetect, "Notify", args);
-            //QMessageBox::warning(this, "Message", message.errorMessage(), QMessageBox::Ok, QMessageBox::Ok);
+                QList<QVariant> args;
+                args << "theMedia"<< (uint) 0 << "media-playback-start" << "theMedia" <<
+                                        "Now Playing: " + ui->title->text() + " by " + ui->artist->text() <<
+                                        QStringList() << QVariantMap() << (int) -1;
 
-            //QSystemTrayIcon* notification = new QSystemTrayIcon(this);
-            //notification->showMessage("theMedia", "Now Playing: " + ui->title->text() + " by " + ui->artist->text());
+                QDBusMessage message = interface.callWithArgumentList(QDBus::AutoDetect, "Notify", args);
+                //QMessageBox::warning(this, "Message", message.errorMessage(), QMessageBox::Ok, QMessageBox::Ok);
+
+                //QSystemTrayIcon* notification = new QSystemTrayIcon(this);
+                //notification->showMessage("theMedia", "Now Playing: " + ui->title->text() + " by " + ui->artist->text());
+            }
         }
     });
     connect(player, SIGNAL(totalTimeChanged(qint64)), this, SLOT(on_player_totalTimeChanged(qint64)));
     connect(player, SIGNAL(aboutToFinish()), this, SLOT(on_pushButton_2_clicked()));
     connect(player, SIGNAL(tick(qint64)), this, SLOT(on_player_tick(qint64)));
     connect(player, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(on_player_stateChanged(Phonon::State)));
+    connect(player, SIGNAL(hasVideoChanged(bool)), this, SLOT(on_player_hasVideoChanged(bool)));
 
     ui->seekSlider->setMediaObject(player);
+
+    controller = new MediaController(player);
+    connect(controller, SIGNAL(availableTitlesChanged(int)), this, SLOT(on_controller_availableTitlesChanged(int)));
+    connect(controller, SIGNAL(titleChanged(int)), this, SLOT(on_controller_titleChanged(int)));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+bool MainWindow::eventFilter(QObject *, QEvent *event) {
+    if (event->type() == QEvent::MouseMove) {
+        if (player->hasVideo()) {
+            if (mouseTimer != NULL) {
+                mouseTimer->stop();
+                delete mouseTimer;
+                mouseTimer = NULL;
+            }
+
+            mouseTimer = new QTimer(this);
+            mouseTimer->setInterval(5000);
+            mouseTimer->setSingleShot(true);
+            connect(mouseTimer, &QTimer::timeout, [=]() {
+                mouseTimer->stop();
+                delete mouseTimer;
+                mouseTimer = NULL;
+                ui->mediaControlFrame->setVisible(false);
+                ui->menuBar->setVisible(false);
+                QApplication::changeOverrideCursor(Qt::BlankCursor);
+            });
+            mouseTimer->start();
+
+            ui->mediaControlFrame->setVisible(true);
+            ui->menuBar->setVisible(true);
+            QApplication::restoreOverrideCursor();
+            event->ignore();
+            return false;
+        }
+    }
+    event->ignore();
+
+    return false;
+}
+
+void MainWindow::on_controller_titleChanged(int titleNumber) {
+    if (playlist.first().discType() == Phonon::Cd) {
+        if (cddbinfo.count() == 0) {
+            ui->title->setText("Track " + QString::number(titleNumber));
+            ui->artist->setText("");
+            ui->album->setText("");
+        } else {
+            ui->title->setText(cddbinfo.at(titleNumber - 1).value("name"));
+            ui->artist->setText(cddbinfo.at(titleNumber - 1).value("artist"));
+            ui->album->setText(cddbinfo.at(titleNumber - 1).value("album"));
+        }
+        for (int i = 0; i < ui->playlistWidget->count(); i++) {
+            if (i + 1 == titleNumber) {
+                ui->playlistWidget->item(i)->setIcon(QIcon::fromTheme("media-playback-start"));
+            } else {
+                ui->playlistWidget->item(i)->setIcon(QIcon::fromTheme("media-optical-audio"));
+            }
+        }
+    }
+}
+
+void MainWindow::on_controller_availableTitlesChanged(int availableTitles) {
+    if (playlist.first().discType() == Phonon::Cd) {
+        ui->playlistWidget->clear();
+
+        if (cddbinfo.count() == 0) {
+            for (int i = 1; i <= availableTitles; i++) {
+                QListWidgetItem* item = new QListWidgetItem();
+                item->setText("Track " + QString::number(i));
+                item->setIcon(QIcon::fromTheme("media-optical-audio"));
+
+                ui->playlistWidget->addItem(item);
+            }
+        } else {
+            for (QMap<QString, QString> info : cddbinfo) {
+                QListWidgetItem* item = new QListWidgetItem();
+                item->setText(info.value("name"));
+                item->setIcon(QIcon::fromTheme("media-optical-audio"));
+                ui->playlistWidget->addItem(item);
+            }
+        }
+    }
+}
+
+void MainWindow::on_player_hasVideoChanged(bool hasVideo) {
+    if (hasVideo) {
+        ui->VideoWidget->setVisible(true);
+        ui->mediaInfoFrame->setVisible(false);
+        ui->spacerFrame->setVisible(false);
+        ui->mediaControlFrame->setVisible(false);
+
+        if (this->isFullScreen()) {
+            QApplication::changeOverrideCursor(Qt::BlankCursor);
+        } else {
+            QApplication::restoreOverrideCursor();
+        }
+    } else {
+        ui->VideoWidget->setVisible(false);
+        ui->mediaInfoFrame->setVisible(true);
+        ui->mediaControlFrame->setVisible(true);
+        ui->spacerFrame->setVisible(true);
+
+        if (mouseTimer != NULL) {
+            mouseTimer->stop();
+            delete mouseTimer;
+            mouseTimer = NULL;
+        }
+        QApplication::restoreOverrideCursor();
+    }
 }
 
 void MainWindow::on_player_stateChanged(Phonon::State newState) {
@@ -95,25 +249,41 @@ void MainWindow::on_actionOpen_Media_triggered()
 }
 
 void MainWindow::updatePlaylist() {
-    ui->playlistWidget->clear();
+    if (playlist.count() > 0) {
+        if (playlist.first().type() == MediaSource::Disc) {
+            if (playlist.first().discType() == Phonon::Cd) {
 
-    for (MediaSource source : playlist) {
-        MediaObject* tempPlayer = new MediaObject(this);
-        tempPlayer->setCurrentSource(source);
-        tempPlayer->play();
+            } else {
+                ui->dvdControls->setVisible(true);
+            }
+        } else {
+            ui->dvdControls->setVisible(false);
+            ui->playlistWidget->clear();
+            for (MediaSource source : playlist) {
+                QListWidgetItem* item = new QListWidgetItem();
 
-        QListWidgetItem* item = new QListWidgetItem();
+                switch (source.type()) {
+                case MediaSource::LocalFile:
+                    item->setText(source.fileName());
+                    break;
+                case MediaSource::Url:
+                    if (source.url().isLocalFile()) {
+                        item->setText(QFileInfo(source.url().path() + source.url().fileName()).baseName());
+                    } else {
+                        item->setText(source.url().toDisplayString());
+                    }
+                    break;
+                }
 
-        QStringList Title = tempPlayer->metaData(Phonon::TitleMetaData);
-        if (Title.count() > 0) {
-            item->setText(Title.at(0));
+                if (playlist.indexOf(source) == currentPlaylist) {
+                    item->setIcon(QIcon::fromTheme("media-playback-start"));
+                } else {
+                    item->setIcon(QIcon::fromTheme("audio-x-generic"));
+                }
+
+                ui->playlistWidget->addItem(item);
+            }
         }
-        tempPlayer->deleteLater();
-
-            item->setIcon(QIcon::fromTheme("media-playback-start"));
-            item->setIcon(QIcon::fromTheme("audio-x-generic"));
-
-        ui->playlistWidget->addItem(item);
     }
 }
 
@@ -140,33 +310,111 @@ void MainWindow::on_player_totalTimeChanged(qint64 time) {
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    currentPlaylist++;
+    if (playlist.first().type() == MediaSource::Disc) {
+        if (playlist.first().discType() == Phonon::Cd) {
+            controller->nextTitle();
+        } else {
+            if (controller->availableChapters() == controller->currentChapter()) {
+                controller->nextTitle();
+            } else {
+                controller->setCurrentChapter(controller->currentChapter() + 1);
+            }
+        }
+    } else {
+        currentPlaylist++;
 
-    if (currentPlaylist == playlist.length()) {
-        currentPlaylist = 0;
+        if (currentPlaylist == playlist.length()) {
+            currentPlaylist = 0;
+        }
+
+        if (sender() == player) {
+            player->enqueue(playlist.at(currentPlaylist));
+        } else {
+            player->setCurrentSource(playlist.at(currentPlaylist));
+            player->play();
+        }
+
+        updatePlaylist();
     }
-
-    player->setCurrentSource(playlist.at(currentPlaylist));
-    player->play();
-
-    updatePlaylist();
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    currentPlaylist--;
 
-    if (currentPlaylist == -1) {
-        currentPlaylist = playlist.length() - 1;
+    if (playlist.first().type() == MediaSource::Disc) {
+        if (playlist.first().discType() == Phonon::Cd) {
+            controller->previousTitle();
+        } else {
+            if (controller->currentChapter() == 1) {
+                controller->previousTitle();
+            } else {
+                controller->setCurrentChapter(controller->currentChapter() - 1);
+            }
+        }
+    } else {
+        currentPlaylist--;
+
+        if (currentPlaylist == -1) {
+            currentPlaylist = playlist.length() - 1;
+        }
+
+        player->setCurrentSource(playlist.at(currentPlaylist));
+        player->play();
+
+        updatePlaylist();
     }
-
-    player->setCurrentSource(playlist.at(currentPlaylist));
-    player->play();
-
-    updatePlaylist();
 }
 
 void MainWindow::on_actionExit_triggered()
 {
     QApplication::exit(0);
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    if (this->isFullScreen()) {
+        this->showNormal();
+        ui->pushButton_3->setIcon(QIcon::fromTheme("view-fullscreen"));
+        ui->mediaControlFrame->setVisible(true);
+        ui->playlistWidget->setVisible(true);
+        ui->menuBar->setVisible(true);
+        QApplication::restoreOverrideCursor();
+    } else {
+        this->showFullScreen();
+        ui->pushButton_3->setIcon(QIcon::fromTheme("view-restore"));
+        ui->playlistWidget->setVisible(false);
+        if (player->hasVideo()) {
+            ui->mediaControlFrame->setVisible(false);
+            QApplication::changeOverrideCursor(Qt::BlankCursor);
+        } else {
+            ui->mediaControlFrame->setVisible(true);
+            QApplication::restoreOverrideCursor();
+        }
+        ui->menuBar->setVisible(false);
+    }
+}
+
+void MainWindow::on_playlistWidget_itemClicked(QListWidgetItem *item)
+{
+    if (playlist.first().type() == MediaSource::Disc) {
+        if (playlist.first().discType() == Phonon::Cd) {
+            controller->setCurrentTitle(ui->playlistWidget->row(item) + 1);
+        }
+    } else {
+        currentPlaylist = ui->playlistWidget->row(item);
+        player->setCurrentSource(playlist.at(currentPlaylist));
+        player->play();
+
+        updatePlaylist();
+    }
+}
+
+void MainWindow::on_dvdRootMenu_clicked()
+{
+    controller->setCurrentMenu(MediaController::RootMenu);
+}
+
+void MainWindow::on_dvdTitleMenu_clicked()
+{
+    controller->setCurrentMenu(MediaController::TitleMenu);
 }

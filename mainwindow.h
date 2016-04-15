@@ -17,7 +17,13 @@
 #include <QDBusConnection>
 #include <QMessageBox>
 #include <QDBusInterface>
+#include <QTimer>
+#include <QMouseEvent>
+#include <QProgressDialog>
+#include <QThread>
 #include <phonon/AbstractMediaStream>
+#include <phonon/MediaController>
+#include "cddbworker.h"
 
 using namespace Phonon;
 
@@ -52,6 +58,20 @@ private slots:
 
     void on_actionExit_triggered();
 
+    void on_player_hasVideoChanged(bool hasVideo);
+
+    void on_pushButton_3_clicked();
+
+    void on_controller_titleChanged(int titleNumber);
+
+    void on_controller_availableTitlesChanged(int availableTitles);
+
+    void on_playlistWidget_itemClicked(QListWidgetItem *item);
+
+    void on_dvdRootMenu_clicked();
+
+    void on_dvdTitleMenu_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -59,8 +79,14 @@ private:
     int currentPlaylist;
 
     MediaObject* player;
+    MediaController* controller;
+
+    QTimer* mouseTimer = NULL;
+    QList<QMap<QString, QString>> cddbinfo;
     //QMediaPlaylist* playlist;
     //QMediaPlayer* player;
+
+    bool eventFilter(QObject *, QEvent *event);
 };
 
 #endif // MAINWINDOW_H

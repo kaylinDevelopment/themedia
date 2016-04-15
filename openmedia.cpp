@@ -31,7 +31,18 @@ void OpenMedia::on_pushButton_clicked()
             playlist->append(source);
         }
         break;
-    case 2: //CD
+    case 2: //CD/DVD
+        {
+        playlist->clear();
+            if (ui->CdRadio->isChecked()) { //Try to play CD
+                MediaSource source(Phonon::Cd, ui->deviceLine->text());
+                playlist->append(source);
+            } else {
+                MediaSource source(Phonon::Dvd, ui->deviceLine->text()); //Try to play DVD
+                playlist->append(source);
+                //TODO: Buy a BD Reader and test Blu-Ray discs.
+            }
+        }
         break;
     }
 
