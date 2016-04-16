@@ -458,6 +458,9 @@
    </property>
   </action>
   <action name="actionImport_CD">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset theme="media-optical-audio"/>
    </property>
