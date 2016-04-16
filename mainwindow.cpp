@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    //XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XK_Pause), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
+
     this->setMouseTracking(true);
     ui->VideoWidget->installEventFilter(this);
     ui->VideoWidget->setMouseTracking(true);
@@ -17,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->VideoWidget->setVisible(false);
     ui->dvdControls->setVisible(false);
     ui->cddbProgressFrame->setVisible(false);
+    ui->errorFrame->setVisible(false);
+    ui->errorImage->setPixmap(QIcon::fromTheme("dialog-error").pixmap(24, 24));
 
     player = new MediaObject(this);
     createPath(player, new AudioOutput(Phonon::MusicCategory, this));
@@ -115,11 +119,35 @@ MainWindow::MainWindow(QWidget *parent) :
     controller = new MediaController(player);
     connect(controller, SIGNAL(availableTitlesChanged(int)), this, SLOT(on_controller_availableTitlesChanged(int)));
     connect(controller, SIGNAL(titleChanged(int)), this, SLOT(on_controller_titleChanged(int)));
+
+    dataOut = new AudioDataOutput(this);
+    dataOut->setDataSize(this->width());
+    connect(dataOut, SIGNAL(dataReady(QMap<Phonon::AudioDataOutput::Channel,QVector<qint16>>)), this, SLOT(on_dataOut_dataReady(QMap<Phonon::AudioDataOutput::Channel,QVector<qint16>>)));
+    createPath(player, dataOut);
+
+    /*KAction* playPauseGlobalButton = new KAction(this);
+    playPauseGlobalButton->setGlobalShortcut(KShortcut(Qt::Key_MediaPause));
+    connect(playPauseGlobalButton, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this, SLOT(on_playPause_clicked()));*/
 }
 
 MainWindow::~MainWindow()
 {
+    //XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XK_Pause), AnyModifier, QX11Info::appRootWindow());
     delete ui;
+}
+
+void MainWindow::on_dataOut_dataReady(QMap<AudioDataOutput::Channel, QVector<qint16>> data) {
+    /*quint64 visualisationRecord;
+    for (qint64 sample : data.value(AudioDataOutput::LeftChannel)) {
+        visualisationRecord = visualisationRecord + (sample ^ 2);
+
+    }
+
+    quint64 visualisation = qSqrt(visualisationRecord / 11025);*/
+    //ui->->setValue(visualisation);
+
+    ui->spacerFrame->setVisualisation(data.value(AudioDataOutput::LeftChannel));
+    ui->spacerFrame->update();
 }
 
 bool MainWindow::eventFilter(QObject *, QEvent *event) {
@@ -149,6 +177,10 @@ bool MainWindow::eventFilter(QObject *, QEvent *event) {
             QApplication::restoreOverrideCursor();
             event->ignore();
             return false;
+        }
+    } else if (event->type() == QEvent::KeyPress) {
+        if (((QKeyEvent*) event)->key() == Qt::Key_MediaPlay) {
+            on_playPause_clicked();
         }
     }
     event->ignore();
@@ -190,9 +222,10 @@ void MainWindow::on_controller_availableTitlesChanged(int availableTitles) {
                 ui->playlistWidget->addItem(item);
             }
         } else {
-            for (QMap<QString, QString> info : cddbinfo) {
+            for (int i = 1; i <= availableTitles; i++) {
+                QMap<QString, QString> info = cddbinfo.at(i - 1);
                 QListWidgetItem* item = new QListWidgetItem();
-                item->setText(info.value("name"));
+                item->setText("(" + QString::number(i) + ") " + info.value("name"));
                 item->setIcon(QIcon::fromTheme("media-optical-audio"));
                 ui->playlistWidget->addItem(item);
             }
@@ -232,6 +265,13 @@ void MainWindow::on_player_stateChanged(Phonon::State newState) {
         ui->playPause->setIcon(QIcon::fromTheme("media-playback-pause"));
     } else {
         ui->playPause->setIcon(QIcon::fromTheme("media-playback-start"));
+    }
+
+    if (newState == Phonon::ErrorState) {
+        ui->errorText->setText(player->errorString());
+        ui->errorFrame->setVisible(true);
+    } else {
+        ui->errorFrame->setVisible(false);
     }
 }
 
@@ -303,9 +343,13 @@ void MainWindow::on_player_tick(qint64 time) {
 }
 
 void MainWindow::on_player_totalTimeChanged(qint64 time) {
-    QTime total(0, 0, 0);
-    total = total.addMSecs(time);
-    ui->totalTime->setText(total.toString("mm:ss"));
+    if (time == 0) {
+        ui->totalTime->setText("∞");
+    } else {
+        QTime total(0, 0, 0);
+        total = total.addMSecs(time);
+        ui->totalTime->setText(total.toString("mm:ss"));
+    }
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -417,4 +461,30 @@ void MainWindow::on_dvdRootMenu_clicked()
 void MainWindow::on_dvdTitleMenu_clicked()
 {
     controller->setCurrentMenu(MediaController::TitleMenu);
+}
+
+void MainWindow::on_spacerFrame_visualisationRateChanged(int size)
+{
+    dataOut->setDataSize(size);
+}
+
+void MainWindow::on_actionImport_CD_triggered()
+{
+    ImportCd* cdImport = new ImportCd(this);
+    cdImport->exec();
+}
+
+void MainWindow::on_actionEject_Disc_triggered()
+{
+    QProcess::startDetached("eject");
+}
+
+void MainWindow::on_dvdGoToChapter_clicked()
+{
+    controller->setCurrentChapter(QInputDialog::getInt(this, "Go To Chapter", "Enter chapter number to go to", controller->currentChapter(), 1, controller->availableChapters()));
+}
+
+void MainWindow::on_dvdGoToTitle_clicked()
+{
+    controller->setCurrentTitle(QInputDialog::getInt(this, "Go To Title", "Enter title number to go to", controller->currentTitle(), 1, controller->availableTitles()));
 }

@@ -21,9 +21,19 @@
 #include <QMouseEvent>
 #include <QProgressDialog>
 #include <QThread>
+#include <QProcess>
+#include <QInputDialog>
+#include <QtX11Extras/QX11Info>
+#include <QtMath>
 #include <phonon/AbstractMediaStream>
 #include <phonon/MediaController>
+#include <phonon/AudioDataOutput>
+//#include "Xlib.h"
+//#include <X11/keysym.h>
 #include "cddbworker.h"
+//#include <kaction.h>
+//#include <kshortcut.h>
+#include "importcd.h"
 
 using namespace Phonon;
 
@@ -72,6 +82,18 @@ private slots:
 
     void on_dvdTitleMenu_clicked();
 
+    void on_dataOut_dataReady(QMap<Phonon::AudioDataOutput::Channel,QVector<qint16>> data);
+
+    void on_spacerFrame_visualisationRateChanged(int );
+
+    void on_actionImport_CD_triggered();
+
+    void on_actionEject_Disc_triggered();
+
+    void on_dvdGoToChapter_clicked();
+
+    void on_dvdGoToTitle_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -80,6 +102,7 @@ private:
 
     MediaObject* player;
     MediaController* controller;
+    AudioDataOutput* dataOut;
 
     QTimer* mouseTimer = NULL;
     QList<QMap<QString, QString>> cddbinfo;

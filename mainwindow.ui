@@ -101,18 +101,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="spacerFrame">
+       <widget class="VisualisationFrame" name="spacerFrame">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>5</height>
-         </size>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -120,6 +114,7 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4"/>
        </widget>
       </item>
       <item>
@@ -145,6 +140,38 @@
            </property>
            <property name="value">
             <number>-1</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="errorFrame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="errorImage">
+           <property name="text">
+            <string>error</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="errorText">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Error Error!</string>
            </property>
           </widget>
          </item>
@@ -281,7 +308,18 @@
               <property name="spacing">
                <number>0</number>
               </property>
-              <item row="0" column="0">
+              <item row="1" column="1">
+               <widget class="QPushButton" name="dvdTitleMenu">
+                <property name="text">
+                 <string>Title Menu</string>
+                </property>
+                <property name="icon">
+                 <iconset theme="application-menu">
+                  <normaloff>.</normaloff>.</iconset>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
                <widget class="QPushButton" name="dvdRootMenu">
                 <property name="text">
                  <string>Root Menu</string>
@@ -292,14 +330,17 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="dvdTitleMenu">
+              <item row="0" column="0">
+               <widget class="QPushButton" name="dvdGoToChapter">
                 <property name="text">
-                 <string>Title Menu</string>
+                 <string>Go To Chapter...</string>
                 </property>
-                <property name="icon">
-                 <iconset theme="application-menu">
-                  <normaloff>.</normaloff>.</iconset>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="dvdGoToTitle">
+                <property name="text">
+                 <string>Go To Title...</string>
                 </property>
                </widget>
               </item>
@@ -388,6 +429,9 @@
     </property>
     <addaction name="actionOpen_Media"/>
     <addaction name="separator"/>
+    <addaction name="actionImport_CD"/>
+    <addaction name="actionEject_Disc"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -409,6 +453,28 @@
    <property name="text">
     <string>&amp;Open Media...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionImport_CD">
+   <property name="icon">
+    <iconset theme="media-optical-audio"/>
+   </property>
+   <property name="text">
+    <string>Import CD</string>
+   </property>
+  </action>
+  <action name="actionEject_Disc">
+   <property name="icon">
+    <iconset theme="media-eject"/>
+   </property>
+   <property name="text">
+    <string>Eject Disc</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+J</string>
+   </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -422,6 +488,12 @@
    <class>Phonon::VideoWidget</class>
    <extends>QWidget</extends>
    <header location="global">phonon/videowidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>VisualisationFrame</class>
+   <extends>QFrame</extends>
+   <header>visualisationframe.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
