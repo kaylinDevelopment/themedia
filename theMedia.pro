@@ -34,3 +34,6 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     icons.qrc
+
+DISTFILES += \
+    themedia.desktop
