@@ -129,6 +129,19 @@ MainWindow::MainWindow(QWidget *parent) :
     /*KAction* playPauseGlobalButton = new KAction(this);
     playPauseGlobalButton->setGlobalShortcut(KShortcut(Qt::Key_MediaPause));
     connect(playPauseGlobalButton, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this, SLOT(on_playPause_clicked()));*/
+
+    QStringList arguments = QApplication::arguments();
+    arguments.removeFirst();
+    for (QUrl argument : QUrl::fromStringList(arguments)) {
+        MediaSource source(argument);
+        playlist.append(source);
+    }
+
+    if (playlist.count() > 0) {
+        player->enqueue(playlist.at(0));
+        player->play();
+        currentPlaylist = 0;
+    }
 }
 
 MainWindow::~MainWindow()

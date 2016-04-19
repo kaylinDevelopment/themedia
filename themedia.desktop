@@ -6,4 +6,4 @@ Name=theMedia
 GenericName=Media Player
 Exec=themedia
 Icon=themedia
-MimeType=audio/mp3;audio/mpeg;audio/mpeg3;audio/wav;video/avi;video/msvideo;video/mpeg;video/quicktime;video/x-ms-wmv
+MimeType=audio/mp3;audio/mpeg;audio/mpeg3;audio/wav;audio/ogg;audio/mp4;video/avi;video/msvideo;video/mpeg;video/quicktime;video/x-ms-wmv
