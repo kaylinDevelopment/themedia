@@ -46,35 +46,11 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Coming Soon!</string>
+        <widget class="QListWidget" name="playlistWidget">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
          </property>
         </widget>
-       </item>
-       <item>
-        <widget class="QListView" name="listView">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_2">
-      <attribute name="title">
-       <string>Media Stream</string>
-      </attribute>
-      <layout class="QFormLayout" name="formLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Stream URL</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="streamUrl"/>
        </item>
       </layout>
      </widget>
@@ -113,6 +89,36 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Playing a CD/DVD will clear the current playlist. &lt;/p&gt;&lt;p&gt;DVD Playback is &lt;span style=&quot; font-weight:600;&quot;&gt;very flaky.&lt;/span&gt; theMedia may crash at any given point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Media Stream</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Stream URL</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="streamUrl"/>
        </item>
       </layout>
      </widget>
@@ -169,6 +175,17 @@
     </layout>
    </item>
   </layout>
+  <action name="actionDelete_Playlist">
+   <property name="icon">
+    <iconset theme="edit-delete"/>
+   </property>
+   <property name="text">
+    <string>Delete Playlist</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

@@ -225,11 +225,11 @@
             </widget>
            </item>
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout">
+            <layout class="QGridLayout" name="gridLayout_2">
              <property name="spacing">
               <number>0</number>
              </property>
-             <item>
+             <item row="0" column="0">
               <widget class="QPushButton" name="pushButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -249,7 +249,7 @@
                </property>
               </widget>
              </item>
-             <item>
+             <item row="1" column="0">
               <widget class="QPushButton" name="pushButton_2">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -263,6 +263,41 @@
                <property name="icon">
                 <iconset theme="media-skip-forward">
                  <normaloff>.</normaloff>.</iconset>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPushButton" name="shuffleButton">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset theme="media-playlist-shuffle"/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="repeatButton">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset theme="media-playlist-repeat"/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -397,19 +432,53 @@
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="playlistWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
+     <widget class="QFrame" name="playlistFrame">
       <property name="maximumSize">
        <size>
         <width>300</width>
         <height>16777215</height>
        </size>
       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QListWidget" name="playlistWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="createPlaylistButton">
+         <property name="text">
+          <string>Create Playlist</string>
+         </property>
+         <property name="icon">
+          <iconset theme="document-save"/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -428,6 +497,7 @@
      <string>Fi&amp;le</string>
     </property>
     <addaction name="actionOpen_Media"/>
+    <addaction name="actionSave_Playlist"/>
     <addaction name="separator"/>
     <addaction name="actionImport_CD"/>
     <addaction name="actionEject_Disc"/>
@@ -462,21 +532,39 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="media-optical-audio"/>
+    <iconset theme="media-optical-audio">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Import CD</string>
+    <string>&amp;Import CD</string>
    </property>
   </action>
   <action name="actionEject_Disc">
    <property name="icon">
-    <iconset theme="media-eject"/>
+    <iconset theme="media-eject">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Eject Disc</string>
+    <string>Eject &amp;Disc</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+J</string>
+   </property>
+  </action>
+  <action name="actionSave_Playlist">
+   <property name="icon">
+    <iconset theme="document-save"/>
+   </property>
+   <property name="text">
+    <string>Save Playlist</string>
+   </property>
+  </action>
+  <action name="actionRemove_from_Playlist">
+   <property name="icon">
+    <iconset theme="edit-delete"/>
+   </property>
+   <property name="text">
+    <string>Remove from Playlist</string>
    </property>
   </action>
  </widget>

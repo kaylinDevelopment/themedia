@@ -23,6 +23,7 @@
 #include <QThread>
 #include <QProcess>
 #include <QInputDialog>
+#include <QMimeData>
 #include <QtX11Extras/QX11Info>
 #include <QtMath>
 #include <phonon/AbstractMediaStream>
@@ -93,6 +94,14 @@ private slots:
     void on_dvdGoToChapter_clicked();
 
     void on_dvdGoToTitle_clicked();
+
+    void on_createPlaylistButton_clicked();
+
+    void on_actionSave_Playlist_triggered();
+
+    void on_playlistWidget_customContextMenuRequested(const QPoint &pos);
+
+    void on_actionRemove_from_Playlist_triggered();
 
 private:
     Ui::MainWindow *ui;

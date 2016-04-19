@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <phonon/MediaSource>
 #include <QFileDialog>
+#include <QMenu>
+#include <QMessageBox>
 
 using namespace Phonon;
 
@@ -26,10 +28,16 @@ private slots:
 
     void on_pushButton_3_clicked();
 
+    void on_playlistWidget_customContextMenuRequested(const QPoint &pos);
+
+    void on_actionDelete_Playlist_triggered();
+
 private:
     Ui::OpenMedia *ui;
 
     QList<MediaSource>* playlist;
+
+    void reloadPlaylists();
 };
 
 #endif // OPENMEDIA_H

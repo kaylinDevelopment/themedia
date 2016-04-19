@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XK_Pause), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
 
     this->setMouseTracking(true);
+    this->setAcceptDrops(true);
     ui->VideoWidget->installEventFilter(this);
     ui->VideoWidget->setMouseTracking(true);
 
@@ -150,43 +151,6 @@ void MainWindow::on_dataOut_dataReady(QMap<AudioDataOutput::Channel, QVector<qin
     ui->spacerFrame->update();
 }
 
-bool MainWindow::eventFilter(QObject *, QEvent *event) {
-    if (event->type() == QEvent::MouseMove) {
-        if (player->hasVideo()) {
-            if (mouseTimer != NULL) {
-                mouseTimer->stop();
-                delete mouseTimer;
-                mouseTimer = NULL;
-            }
-
-            mouseTimer = new QTimer(this);
-            mouseTimer->setInterval(5000);
-            mouseTimer->setSingleShot(true);
-            connect(mouseTimer, &QTimer::timeout, [=]() {
-                mouseTimer->stop();
-                delete mouseTimer;
-                mouseTimer = NULL;
-                ui->mediaControlFrame->setVisible(false);
-                ui->menuBar->setVisible(false);
-                QApplication::changeOverrideCursor(Qt::BlankCursor);
-            });
-            mouseTimer->start();
-
-            ui->mediaControlFrame->setVisible(true);
-            ui->menuBar->setVisible(true);
-            QApplication::restoreOverrideCursor();
-            event->ignore();
-            return false;
-        }
-    } else if (event->type() == QEvent::KeyPress) {
-        if (((QKeyEvent*) event)->key() == Qt::Key_MediaPlay) {
-            on_playPause_clicked();
-        }
-    }
-    event->ignore();
-
-    return false;
-}
 
 void MainWindow::on_controller_titleChanged(int titleNumber) {
     if (playlist.first().discType() == Phonon::Cd) {
@@ -296,7 +260,10 @@ void MainWindow::updatePlaylist() {
             } else {
                 ui->dvdControls->setVisible(true);
             }
+
+            ui->createPlaylistButton->setVisible(false);
         } else {
+            ui->createPlaylistButton->setVisible(true);
             ui->dvdControls->setVisible(false);
             ui->playlistWidget->clear();
             for (MediaSource source : playlist) {
@@ -365,7 +332,12 @@ void MainWindow::on_pushButton_2_clicked()
             }
         }
     } else {
-        currentPlaylist++;
+        if (ui->repeatButton->isChecked()) {
+        } else if (ui->shuffleButton->isChecked()) {
+            currentPlaylist = qrand() % playlist.count();
+        } else {
+            currentPlaylist++;
+        }
 
         if (currentPlaylist == playlist.length()) {
             currentPlaylist = 0;
@@ -420,13 +392,13 @@ void MainWindow::on_pushButton_3_clicked()
         this->showNormal();
         ui->pushButton_3->setIcon(QIcon::fromTheme("view-fullscreen"));
         ui->mediaControlFrame->setVisible(true);
-        ui->playlistWidget->setVisible(true);
+        ui->playlistFrame->setVisible(true);
         ui->menuBar->setVisible(true);
         QApplication::restoreOverrideCursor();
     } else {
         this->showFullScreen();
         ui->pushButton_3->setIcon(QIcon::fromTheme("view-restore"));
-        ui->playlistWidget->setVisible(false);
+        ui->playlistFrame->setVisible(false);
         if (player->hasVideo()) {
             ui->mediaControlFrame->setVisible(false);
             QApplication::changeOverrideCursor(Qt::BlankCursor);
@@ -453,38 +425,148 @@ void MainWindow::on_playlistWidget_itemClicked(QListWidgetItem *item)
     }
 }
 
-void MainWindow::on_dvdRootMenu_clicked()
+void MainWindow::on_dvdRootMenu_clicked() //Go to DVD Root Menu
 {
     controller->setCurrentMenu(MediaController::RootMenu);
 }
 
-void MainWindow::on_dvdTitleMenu_clicked()
+void MainWindow::on_dvdTitleMenu_clicked() //Go to DVD Title Menu
 {
     controller->setCurrentMenu(MediaController::TitleMenu);
 }
 
-void MainWindow::on_spacerFrame_visualisationRateChanged(int size)
+void MainWindow::on_spacerFrame_visualisationRateChanged(int size) //Change Data Rate
 {
     dataOut->setDataSize(size);
 }
 
-void MainWindow::on_actionImport_CD_triggered()
+void MainWindow::on_actionImport_CD_triggered() //Open Import CD Dialog
 {
     ImportCd* cdImport = new ImportCd(this);
     cdImport->exec();
 }
 
-void MainWindow::on_actionEject_Disc_triggered()
+void MainWindow::on_actionEject_Disc_triggered() //Eject Disc
 {
     QProcess::startDetached("eject");
 }
 
-void MainWindow::on_dvdGoToChapter_clicked()
+void MainWindow::on_dvdGoToChapter_clicked() //Go to DVD Chapter
 {
     controller->setCurrentChapter(QInputDialog::getInt(this, "Go To Chapter", "Enter chapter number to go to", controller->currentChapter(), 1, controller->availableChapters()));
 }
 
-void MainWindow::on_dvdGoToTitle_clicked()
+void MainWindow::on_dvdGoToTitle_clicked() //Go to DVD Title
 {
     controller->setCurrentTitle(QInputDialog::getInt(this, "Go To Title", "Enter title number to go to", controller->currentTitle(), 1, controller->availableTitles()));
+}
+
+void MainWindow::on_createPlaylistButton_clicked() //Create a playlist
+{
+    QString playlistName = QInputDialog::getText(this, "Save Playlist", "What do you want to name this playlist?");
+    if (playlistName != "") {
+        QDir::home().mkpath(".themedia/playlists");
+        QFile output(QDir::homePath() + "/.themedia/playlists/" + playlistName);
+        if (output.exists()) {
+            if (QMessageBox::warning(this, "Conflict", "You already have a playlist with the name " + playlistName + ". Do you want to overwrite it?", QMessageBox::Yes, QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
+                return;
+            }
+        }
+        output.open(QFile::WriteOnly);
+        for (MediaSource source : playlist) {
+            QString write;
+
+            if (source.type() == MediaSource::Url) {
+                write = source.url().toString() + "\n";
+            }
+
+            output.write(write.toUtf8());
+        }
+        output.close();
+    }
+}
+
+void MainWindow::on_actionSave_Playlist_triggered()
+{
+    on_createPlaylistButton_clicked();
+}
+
+void MainWindow::on_playlistWidget_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu* menu = new QMenu(this);
+    if (ui->playlistWidget->selectedItems().count() > 0) {
+        menu->addSection("For \"" + ui->playlistWidget->selectedItems().first()->text() + "\"");
+        menu->addAction(ui->actionRemove_from_Playlist);
+    }
+    menu->exec(ui->playlistWidget->mapToGlobal(pos));
+}
+
+void MainWindow::on_actionRemove_from_Playlist_triggered()
+{
+    if (ui->playlistWidget->selectedItems().count() > 0) {
+        QListWidgetItem* item = ui->playlistWidget->selectedItems().first();
+        playlist.removeAt(ui->playlistWidget->row(item));
+        delete item;
+    }
+}
+
+bool MainWindow::eventFilter(QObject *, QEvent *event) {
+    if (event->type() == QEvent::MouseMove) {
+        if (player->hasVideo()) {
+            if (mouseTimer != NULL) {
+                mouseTimer->stop();
+                delete mouseTimer;
+                mouseTimer = NULL;
+            }
+
+            mouseTimer = new QTimer(this);
+            mouseTimer->setInterval(5000);
+            mouseTimer->setSingleShot(true);
+            connect(mouseTimer, &QTimer::timeout, [=]() {
+                mouseTimer->stop();
+                delete mouseTimer;
+                mouseTimer = NULL;
+                ui->mediaControlFrame->setVisible(false);
+                ui->menuBar->setVisible(false);
+                QApplication::changeOverrideCursor(Qt::BlankCursor);
+            });
+            mouseTimer->start();
+
+            ui->mediaControlFrame->setVisible(true);
+            ui->menuBar->setVisible(true);
+            QApplication::restoreOverrideCursor();
+            event->ignore();
+            return false;
+        }
+    } else if (event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = (QKeyEvent*) event;
+        if (keyEvent->key() == Qt::Key_MediaPlay || keyEvent->key() == Qt::Key_Space) {
+            on_playPause_clicked();
+            return true;
+        }
+        return false;
+    } else if (event->type() == QEvent::DragEnter) {
+        QDragEnterEvent* dragEvent = (QDragEnterEvent*) event;
+        if (dragEvent->mimeData()->hasUrls()) {
+            dragEvent->acceptProposedAction();
+        }
+        return true;
+    } else if (event->type() == QEvent::Drop) {
+        QDropEvent* dropEvent = (QDropEvent*) event;
+        const QMimeData* data = dropEvent->mimeData();
+
+        if (data->hasUrls()) {
+            for (QUrl url : data->urls()) {
+                MediaSource source(url);
+                playlist.append(source);
+            }
+
+            updatePlaylist();
+        }
+
+        dropEvent->acceptProposedAction();
+        return true;
+    }
+
+    return false;
 }
