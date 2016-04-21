@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->errorImage->setPixmap(QIcon::fromTheme("dialog-error").pixmap(24, 24));
 
     player = new MediaObject(this);
+    player->setPrefinishMark(1000);
     createPath(player, new AudioOutput(Phonon::MusicCategory, this));
     createPath(player, ui->VideoWidget);
 
@@ -110,7 +111,9 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
     connect(player, SIGNAL(totalTimeChanged(qint64)), this, SLOT(on_player_totalTimeChanged(qint64)));
-    connect(player, SIGNAL(aboutToFinish()), this, SLOT(on_pushButton_2_clicked()));
+    //connect(player, SIGNAL(aboutToFinish()), this, SLOT(on_pushButton_2_clicked()));
+    //connect(player, SIGNAL(prefinishMarkReached(qint32)), this, SLOT(on_pushButton_2_clicked()));
+    connect(player, SIGNAL(finished()), this, SLOT(on_pushButton_2_clicked()));
     connect(player, SIGNAL(tick(qint64)), this, SLOT(on_player_tick(qint64)));
     connect(player, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(on_player_stateChanged(Phonon::State)));
     connect(player, SIGNAL(hasVideoChanged(bool)), this, SLOT(on_player_hasVideoChanged(bool)));
@@ -356,12 +359,12 @@ void MainWindow::on_pushButton_2_clicked()
             currentPlaylist = 0;
         }
 
-        if (sender() == player) {
+        /*if (sender() == player) {
             player->enqueue(playlist.at(currentPlaylist));
-        } else {
+        } else {*/
             player->setCurrentSource(playlist.at(currentPlaylist));
             player->play();
-        }
+        //}
 
         updatePlaylist();
     }
