@@ -2,6 +2,9 @@
 #define IMPORTCD_H
 
 #include <QDialog>
+#include <cdda_interface.h>
+#include <cdda_paranoia.h>
+
 
 namespace Ui {
 class ImportCd;

@@ -9,7 +9,7 @@ CONFIG   += C++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-LIBS += -lmusicbrainz5 -lX11 -lxcb -lxcb-keysyms
+LIBS += -lmusicbrainz5 -lX11 -lxcb -lxcb-keysyms -lcdda_interface -lcdda_paranoia
 
 TARGET = themedia
 TEMPLATE = app

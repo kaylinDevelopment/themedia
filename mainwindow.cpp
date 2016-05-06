@@ -97,10 +97,12 @@ MainWindow::MainWindow(QWidget *parent) :
                 QDBusInterface interface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
                 //QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications/", "org.freedesktop.Notifications", "Notify");
 
+                QVariantMap hints;
+                hints.insert("transient", true);
                 QList<QVariant> args;
                 args << "theMedia"<< (uint) 0 << "media-playback-start" << "theMedia" <<
                                         "Now Playing: " + ui->title->text() + " by " + ui->artist->text() <<
-                                        QStringList() << QVariantMap() << (int) -1;
+                                        QStringList() << hints << (int) -1;
 
                 QDBusMessage message = interface.callWithArgumentList(QDBus::AutoDetect, "Notify", args);
                 //QMessageBox::warning(this, "Message", message.errorMessage(), QMessageBox::Ok, QMessageBox::Ok);
