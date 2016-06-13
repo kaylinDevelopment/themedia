@@ -7,7 +7,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XK_Pause), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
+    NativeEventFilter* native = new NativeEventFilter(this);
+    connect(native, SIGNAL(PlayPause()), this, SLOT(on_playPause_clicked()));
+    connect(native, SIGNAL(Previous()), this, SLOT(on_pushButton_clicked()));
+    connect(native, SIGNAL(Next()), this, SLOT(on_pushButton_2_clicked()));
+    QApplication::instance()->installNativeEventFilter(native);
+    XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPlay), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
+    XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioNext), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
+    XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPrev), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
+
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
@@ -151,7 +159,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    //XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XK_Pause), AnyModifier, QX11Info::appRootWindow());
+    XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPlay), AnyModifier, QX11Info::appRootWindow());
+    XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioNext), AnyModifier, QX11Info::appRootWindow());
+    XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPrev), AnyModifier, QX11Info::appRootWindow());
+
     delete ui;
 }
 
@@ -556,13 +567,6 @@ bool MainWindow::eventFilter(QObject *, QEvent *event) {
             event->ignore();
             return false;
         }
-    } else if (event->type() == QEvent::KeyPress) {
-        QKeyEvent* keyEvent = (QKeyEvent*) event;
-        if (keyEvent->key() == Qt::Key_MediaPlay || keyEvent->key() == Qt::Key_Space) {
-            on_playPause_clicked();
-            return true;
-        }
-        return false;
     } else if (event->type() == QEvent::DragEnter) {
         QDragEnterEvent* dragEvent = (QDragEnterEvent*) event;
         if (dragEvent->mimeData()->hasUrls()) {

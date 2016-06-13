@@ -29,12 +29,15 @@
 #include <phonon/AbstractMediaStream>
 #include <phonon/MediaController>
 #include <phonon/AudioDataOutput>
-//#include "Xlib.h"
-//#include <X11/keysym.h>
 #include "cddbworker.h"
 //#include <kaction.h>
 //#include <kshortcut.h>
 #include "importcd.h"
+#include "nativeeventfilter.h"
+
+#include <X11/keysym.h>
+#include <X11/XF86keysym.h>
+#include "Xlib.h"
 
 using namespace Phonon;
 

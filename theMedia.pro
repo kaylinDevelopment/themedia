@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui phonon4qt5 dbus x11extras KParts
-CONFIG   += C++11
+CONFIG   += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,13 +20,15 @@ SOURCES += main.cpp\
     openmedia.cpp \
     cddbworker.cpp \
     visualisationframe.cpp \
-    importcd.cpp
+    importcd.cpp \
+    nativeeventfilter.cpp
 
 HEADERS  += mainwindow.h \
     openmedia.h \
     cddbworker.h \
     visualisationframe.h \
-    importcd.h
+    importcd.h \
+    nativeeventfilter.h
 
 FORMS    += mainwindow.ui \
     openmedia.ui \
