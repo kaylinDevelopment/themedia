@@ -8,7 +8,7 @@
 #include <QTime>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
-#include "Xlib.h"
+#include <Xlib.h>
 #include <X11/XF86keysym.h>
 
 class NativeEventFilter : public QObject, public QAbstractNativeEventFilter

@@ -7,6 +7,8 @@
     <property name="Identity" type="s" access="read"/>
     <property name="DesktopEntry" type="s" access="read"/>
     <property name="SupportedMimeTypes" type="as" access="read"/>
+    <signal name="bringToFront">
+    </signal>
     <method name="Raise">
     </method>
     <method name="Quit">
