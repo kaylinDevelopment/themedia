@@ -15,6 +15,7 @@
 #include <QPixmap>
 #include <QDBusMessage>
 #include <QDBusConnection>
+#include <QDBusObjectPath>
 #include <QMessageBox>
 #include <QDBusInterface>
 #include <QTimer>
@@ -34,10 +35,13 @@
 //#include <kshortcut.h>
 #include "importcd.h"
 #include "nativeeventfilter.h"
+#undef status
+#include "mprisdbus.h"
 
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
 #include "Xlib.h"
+
 
 using namespace Phonon;
 
@@ -49,9 +53,27 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+
+    Q_PROPERTY(bool CanQuit READ CanQuit)
+    Q_PROPERTY(bool CanRaise READ CanRaise)
+    Q_PROPERTY(bool HasTrackList READ HasTrackList)
+    Q_PROPERTY(QString Identity READ Identity)
+    Q_PROPERTY(QString DesktopEntry READ DesktopEntry)
+    Q_PROPERTY(QStringList SupportedMimeTypes READ SupportedMimeTypes)
+
+    Q_PROPERTY(QString PlaybackStatus READ PlaybackStatus)
+    Q_PROPERTY(QVariantMap Metadata READ Metadata)
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    bool cquit = true;
+    bool craise = true;
+    bool trackList = false;
+    QString id = "theMedia";
+    QString de = "theMedia";
+    QStringList mimeTypes;
 
 private slots:
     void on_actionOpen_Media_triggered();
@@ -106,6 +128,19 @@ private slots:
 
     void on_actionRemove_from_Playlist_triggered();
 
+public Q_SLOTS:
+    void raise();
+    void quit();
+
+    void Next();
+    void Previous();
+    void Pause();
+    void PlayPause();
+    void Stop();
+    void Play();
+    void SetPosition();
+    void OpenUri(QUrl uri);
+
 private:
     Ui::MainWindow *ui;
 
@@ -121,7 +156,22 @@ private:
     //QMediaPlaylist* playlist;
     //QMediaPlayer* player;
 
+    mprisDbus* dbusInterface;
+    mprisDbusPlayer* dbusInterfacePlayer;
+    QVariantMap mprisMetadataMap;
+
     bool eventFilter(QObject *, QEvent *event);
+
+
+    bool CanQuit();
+    bool CanRaise();
+    bool HasTrackList();
+    QString Identity();
+    QString DesktopEntry();
+    QStringList SupportedMimeTypes();
+
+    QString PlaybackStatus();
+    QVariantMap Metadata();
 };
 
 #endif // MAINWINDOW_H

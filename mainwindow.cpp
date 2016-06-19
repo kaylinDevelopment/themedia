@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPlay), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
     XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioNext), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
     XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPrev), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
-
+    XGrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioStop), AnyModifier, RootWindow(QX11Info::display(), 0), true, GrabModeAsync, GrabModeAsync);
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
@@ -74,6 +74,9 @@ MainWindow::MainWindow(QWidget *parent) :
                     showNotification = true;
                     ui->title->setText(Title.at(0));
                 }
+                mprisMetadataMap.insert("xesam:title", Title.first());
+            } else {
+                mprisMetadataMap.remove("xesam:title");
             }
 
             QStringList Artist = player->metaData(Phonon::ArtistMetaData);
@@ -82,11 +85,17 @@ MainWindow::MainWindow(QWidget *parent) :
                     showNotification = true;
                     ui->artist->setText(Artist.at(0));
                 }
+                mprisMetadataMap.insert("xesam:artist", Artist);
+            } else {
+                mprisMetadataMap.remove("xesam:artist");
             }
 
             QStringList Album = player->metaData(Phonon::AlbumMetaData);
             if (Album.count() > 0) {
                 ui->album->setText(Album.at(0));
+                mprisMetadataMap.insert("xesam:album", Album.first());
+            } else {
+                mprisMetadataMap.remove("xesam:album");
             }
 
             QStringList Track = player->metaData(Phonon::TracknumberMetaData);
@@ -112,7 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
                                         "Now Playing: " + ui->title->text() + " by " + ui->artist->text() <<
                                         QStringList() << hints << (int) -1;
 
-                QDBusMessage message = interface.callWithArgumentList(QDBus::AutoDetect, "Notify", args);
+                QDBusMessage message = interface.callWithArgumentList(QDBus::NoBlock, "Notify", args);
                 //QMessageBox::warning(this, "Message", message.errorMessage(), QMessageBox::Ok, QMessageBox::Ok);
 
                 //QSystemTrayIcon* notification = new QSystemTrayIcon(this);
@@ -155,6 +164,18 @@ MainWindow::MainWindow(QWidget *parent) :
         player->play();
         currentPlaylist = 0;
     }
+
+    this->mimeTypes.append("audio/mp3");
+    this->mimeTypes.append("audio/wav");
+    this->mimeTypes.append("audio/ogg");
+    this->mimeTypes.append("audio/mpeg");
+
+    dbusInterface = new mprisDbus(this);
+    dbusInterfacePlayer = new mprisDbusPlayer(this);
+
+    QDBusConnection dbus = QDBusConnection::sessionBus();
+    dbus.registerObject("/org/mpris/MediaPlayer2", this, QDBusConnection::ExportAdaptors);
+    dbus.registerService("org.mpris.MediaPlayer2.theMedia");
 }
 
 MainWindow::~MainWindow()
@@ -162,6 +183,7 @@ MainWindow::~MainWindow()
     XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPlay), AnyModifier, QX11Info::appRootWindow());
     XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioNext), AnyModifier, QX11Info::appRootWindow());
     XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioPrev), AnyModifier, QX11Info::appRootWindow());
+    XUngrabKey(QX11Info::display(), XKeysymToKeycode(QX11Info::display(), XF86XK_AudioStop), AnyModifier, QX11Info::appRootWindow());
 
     delete ui;
 }
@@ -187,10 +209,16 @@ void MainWindow::on_controller_titleChanged(int titleNumber) {
             ui->title->setText("Track " + QString::number(titleNumber));
             ui->artist->setText("");
             ui->album->setText("");
+            mprisMetadataMap.insert("xesam:title", "Track " + QString::number(titleNumber));
+            mprisMetadataMap.remove("xesam:artist");
+            mprisMetadataMap.remove("xesam:album");
         } else {
             ui->title->setText(cddbinfo.at(titleNumber - 1).value("name"));
             ui->artist->setText(cddbinfo.at(titleNumber - 1).value("artist"));
             ui->album->setText(cddbinfo.at(titleNumber - 1).value("album"));
+            mprisMetadataMap.insert("xesam:title", cddbinfo.at(titleNumber - 1).value("name"));
+            mprisMetadataMap.insert("xesam:artist", cddbinfo.at(titleNumber - 1).value("artist"));
+            mprisMetadataMap.insert("xesam:album", cddbinfo.at(titleNumber - 1).value("album"));
         }
         for (int i = 0; i < ui->playlistWidget->count(); i++) {
             if (i + 1 == titleNumber) {
@@ -591,4 +619,119 @@ bool MainWindow::eventFilter(QObject *, QEvent *event) {
     }
 
     return false;
+}
+
+void MainWindow::raise() {
+    QMainWindow::raise();
+}
+
+void MainWindow::quit() {
+    QApplication::exit();
+}
+
+bool MainWindow::CanQuit() {
+    return cquit;
+}
+
+bool MainWindow::CanRaise() {
+    return craise;
+}
+
+
+bool MainWindow::HasTrackList() {
+    return trackList;
+}
+
+QString MainWindow::Identity() {
+    return id;
+}
+
+QString MainWindow::DesktopEntry() {
+    return de;
+}
+
+QStringList MainWindow::SupportedMimeTypes() {
+    return mimeTypes;
+}
+
+void MainWindow::Next() {
+    ui->pushButton_2->click();
+}
+
+void MainWindow::Previous() {
+    ui->pushButton->click();
+}
+
+void MainWindow::Pause() {
+    if (player->state() == Phonon::PlayingState) {
+        player->pause();
+    }
+}
+
+void MainWindow::PlayPause() {
+    ui->playPause->click();
+}
+
+void MainWindow::Stop() {
+    if (player->state() == Phonon::PlayingState) {
+        player->pause();
+    }
+}
+
+void MainWindow::Play() {
+    if (player->state() != Phonon::PlayingState) {
+        player->play();
+    }
+}
+
+void MainWindow::SetPosition() {
+    // TODO: Implement
+}
+
+void MainWindow::OpenUri(QUrl uri) {
+    // TODO: Implement
+}
+
+QString MainWindow::PlaybackStatus() {
+    if (player->state() == Phonon::PlayingState) {
+        return "Playing";
+    } else if (player->state() == Phonon::PausedState) {
+        return "Paused";
+    } else {
+        return "Stopped";
+    }
+}
+
+QVariantMap MainWindow::Metadata() {
+    QVariantMap returnMap;
+    returnMap.insert("mpris:trackid", QVariant::fromValue(QDBusObjectPath("/org/thesuite/song/")));
+    if (playlist.count() > 0) {
+        if (playlist.first().type() == MediaSource::Disc) {
+
+            /*if (playlist.first().discType() == Phonon::Cd && cddbinfo.count() == 0) {
+                ui->cddbProgressFrame->setVisible(true);
+
+                //Read data from Musicbrainz
+                QStringList discid = player->metaData(Phonon::MusicBrainzDiscIdMetaData);
+                if (discid.count() > 0) {
+                    QThread *thread = new QThread;
+                    CddbWorker *worker = new CddbWorker(&cddbinfo, discid, this);
+                    worker->moveToThread(thread);
+                    connect(thread, SIGNAL (started()), worker, SLOT (process()));
+                    connect(worker, SIGNAL (finished()), thread, SLOT (quit()));
+                    connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
+                    connect(thread, SIGNAL (finished()), thread, SLOT (deleteLater()));
+                    connect(worker, &CddbWorker::finished, [=]() {
+                        on_controller_availableTitlesChanged(controller->availableTitles());
+                        on_controller_titleChanged(controller->currentTitle());
+                        ui->cddbProgressFrame->setVisible(false);
+                    });
+                    thread->start();
+                }
+            }*/
+
+        }
+    }
+
+    return mprisMetadataMap;
 }

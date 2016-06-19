@@ -14,6 +14,8 @@ LIBS += -lmusicbrainz5 -lX11 -lxcb -lxcb-keysyms -lcdda_interface -lcdda_paranoi
 TARGET = themedia
 TEMPLATE = app
 
+mpris.files = org.mpris.MediaPlayer2.theMedia.xml
+DBUS_ADAPTORS += mpris
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -21,14 +23,16 @@ SOURCES += main.cpp\
     cddbworker.cpp \
     visualisationframe.cpp \
     importcd.cpp \
-    nativeeventfilter.cpp
+    nativeeventfilter.cpp \
+    mprisdbus.cpp
 
 HEADERS  += mainwindow.h \
     openmedia.h \
     cddbworker.h \
     visualisationframe.h \
     importcd.h \
-    nativeeventfilter.h
+    nativeeventfilter.h \
+    mprisdbus.h
 
 FORMS    += mainwindow.ui \
     openmedia.ui \
