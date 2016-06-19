@@ -5,9 +5,9 @@ mprisDbus::mprisDbus(QObject *parent) : QObject(parent)
     new MediaPlayer2Adaptor(parent);
 }
 
-void mprisDbus::raise() {}
+void mprisDbus::Raise() {}
 
-void mprisDbus::quit() {}
+void mprisDbus::Quit() {}
 
 bool mprisDbus::CanQuit() {}
 
@@ -44,3 +44,5 @@ void mprisDbusPlayer::OpenUri(QUrl uri) {}
 QString mprisDbusPlayer::PlaybackStatus() {}
 
 QVariantMap mprisDbusPlayer::Metadata() {}
+
+float mprisDbusPlayer::Rate() {}

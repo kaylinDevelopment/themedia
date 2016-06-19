@@ -7,9 +7,9 @@
     <property name="Identity" type="s" access="read"/>
     <property name="DesktopEntry" type="s" access="read"/>
     <property name="SupportedMimeTypes" type="as" access="read"/>
-    <method name="raise">
+    <method name="Raise">
     </method>
-    <method name="quit">
+    <method name="Quit">
     </method>
   </interface>
   <interface name="org.mpris.MediaPlayer2.Player">
@@ -30,13 +30,6 @@
     <method name="Play">
     </method>
     <method name="SetPosition">
-    </method>
-    <method name="PlaybackStatus">
-      <arg type="s" direction="out"/>
-    </method>
-    <method name="Metadata">
-      <arg type="a{sv}" direction="out"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
     </method>
   </interface>
 </node>

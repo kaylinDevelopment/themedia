@@ -20,7 +20,7 @@ class mprisDbus : public QObject
 
 
 public:
-    explicit mprisDbus(QObject *parent = 0);
+    explicit mprisDbus(QObject *parent);
 
     bool cquit = true;
     bool craise = true;
@@ -33,8 +33,8 @@ signals:
     void bringToFront();
 
 public Q_SLOTS:
-    void raise();
-    void quit();
+    void Raise();
+    void Quit();
 
 private:
     bool CanQuit();
@@ -52,6 +52,7 @@ class mprisDbusPlayer : public QObject
 
     Q_PROPERTY(QString PlaybackStatus READ PlaybackStatus)
     Q_PROPERTY(QVariantMap Metadata READ Metadata)
+    Q_PROPERTY(float Rate READ Rate)
 public:
     explicit mprisDbusPlayer(QObject* parent = 0);
 
@@ -65,8 +66,10 @@ public Q_SLOTS:
     void SetPosition();
     void OpenUri(QUrl uri);
 
+private:
     QString PlaybackStatus();
     QVariantMap Metadata();
+    float Rate();
 };
 
 #endif // MPRISDBUS_H

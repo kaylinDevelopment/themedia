@@ -202,6 +202,22 @@ void MainWindow::on_dataOut_dataReady(QMap<AudioDataOutput::Channel, QVector<qin
     ui->spacerFrame->update();
 }
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if (player->state() == Phonon::PlayingState) {
+        QMessageBox::StandardButton button = QMessageBox::question(this, "Hide or close", "Do you want theMedia to continue running in the background?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+
+        if (button == QMessageBox::Yes) {
+            event->ignore();
+            this->hide();
+        } else if (button == QMessageBox::Cancel) {
+            event->ignore();
+        } else {
+            event->accept();
+        }
+    } else {
+        event->accept();
+    }
+}
 
 void MainWindow::on_controller_titleChanged(int titleNumber) {
     if (playlist.first().discType() == Phonon::Cd) {
@@ -621,33 +637,34 @@ bool MainWindow::eventFilter(QObject *, QEvent *event) {
     return false;
 }
 
-void MainWindow::raise() {
+void MainWindow::Raise() {
+    this->show();
+    this->setFocus();
     QMainWindow::raise();
 }
 
-void MainWindow::quit() {
+void MainWindow::Quit() {
     QApplication::exit();
 }
 
 bool MainWindow::CanQuit() {
-    return cquit;
+    return true;
 }
 
 bool MainWindow::CanRaise() {
-    return craise;
+    return true;
 }
 
-
 bool MainWindow::HasTrackList() {
-    return trackList;
+    return false;
 }
 
 QString MainWindow::Identity() {
-    return id;
+    return "theMedia";
 }
 
 QString MainWindow::DesktopEntry() {
-    return de;
+    return "theMedia";
 }
 
 QStringList MainWindow::SupportedMimeTypes() {
@@ -700,38 +717,14 @@ QString MainWindow::PlaybackStatus() {
     } else {
         return "Stopped";
     }
+
 }
 
 QVariantMap MainWindow::Metadata() {
-    QVariantMap returnMap;
-    returnMap.insert("mpris:trackid", QVariant::fromValue(QDBusObjectPath("/org/thesuite/song/")));
-    if (playlist.count() > 0) {
-        if (playlist.first().type() == MediaSource::Disc) {
-
-            /*if (playlist.first().discType() == Phonon::Cd && cddbinfo.count() == 0) {
-                ui->cddbProgressFrame->setVisible(true);
-
-                //Read data from Musicbrainz
-                QStringList discid = player->metaData(Phonon::MusicBrainzDiscIdMetaData);
-                if (discid.count() > 0) {
-                    QThread *thread = new QThread;
-                    CddbWorker *worker = new CddbWorker(&cddbinfo, discid, this);
-                    worker->moveToThread(thread);
-                    connect(thread, SIGNAL (started()), worker, SLOT (process()));
-                    connect(worker, SIGNAL (finished()), thread, SLOT (quit()));
-                    connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
-                    connect(thread, SIGNAL (finished()), thread, SLOT (deleteLater()));
-                    connect(worker, &CddbWorker::finished, [=]() {
-                        on_controller_availableTitlesChanged(controller->availableTitles());
-                        on_controller_titleChanged(controller->currentTitle());
-                        ui->cddbProgressFrame->setVisible(false);
-                    });
-                    thread->start();
-                }
-            }*/
-
-        }
-    }
-
+    //We don't create the metadata map here because it takes too long.
     return mprisMetadataMap;
+}
+
+float MainWindow::Rate() {
+    return 1.0;
 }

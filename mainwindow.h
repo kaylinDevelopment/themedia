@@ -53,7 +53,6 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-
     Q_PROPERTY(bool CanQuit READ CanQuit)
     Q_PROPERTY(bool CanRaise READ CanRaise)
     Q_PROPERTY(bool HasTrackList READ HasTrackList)
@@ -63,16 +62,12 @@ class MainWindow : public QMainWindow
 
     Q_PROPERTY(QString PlaybackStatus READ PlaybackStatus)
     Q_PROPERTY(QVariantMap Metadata READ Metadata)
+    Q_PROPERTY(float Rate READ Rate)
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    bool cquit = true;
-    bool craise = true;
-    bool trackList = false;
-    QString id = "theMedia";
-    QString de = "theMedia";
     QStringList mimeTypes;
 
 private slots:
@@ -129,8 +124,8 @@ private slots:
     void on_actionRemove_from_Playlist_triggered();
 
 public Q_SLOTS:
-    void raise();
-    void quit();
+    void Raise();
+    void Quit();
 
     void Next();
     void Previous();
@@ -153,15 +148,13 @@ private:
 
     QTimer* mouseTimer = NULL;
     QList<QMap<QString, QString>> cddbinfo;
-    //QMediaPlaylist* playlist;
-    //QMediaPlayer* player;
 
     mprisDbus* dbusInterface;
     mprisDbusPlayer* dbusInterfacePlayer;
     QVariantMap mprisMetadataMap;
 
     bool eventFilter(QObject *, QEvent *event);
-
+    void closeEvent(QCloseEvent* event);
 
     bool CanQuit();
     bool CanRaise();
@@ -172,6 +165,7 @@ private:
 
     QString PlaybackStatus();
     QVariantMap Metadata();
+    float Rate();
 };
 
 #endif // MAINWINDOW_H
