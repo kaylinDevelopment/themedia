@@ -35,12 +35,11 @@
 //#include <kshortcut.h>
 #include "importcd.h"
 #include "nativeeventfilter.h"
-#undef status
 #include "mprisdbus.h"
 
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
-#include "Xlib.h"
+#include <X11/Xlib.h>
 
 
 using namespace Phonon;

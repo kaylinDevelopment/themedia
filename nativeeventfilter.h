@@ -8,8 +8,11 @@
 #include <QTime>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
-#include <Xlib.h>
+#include <X11/Xlib.h>
 #include <X11/XF86keysym.h>
+
+#undef status
+#undef Bool
 
 class NativeEventFilter : public QObject, public QAbstractNativeEventFilter
 {
