@@ -1,3 +1,21 @@
+/***************************************************************************
+ *   This file is part of theMedia.
+ *
+ *   theMedia is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   theMedia is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with theMedia.  If not, see <http://www.gnu.org/licenses/>.
+ *
+****************************************************************************/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -671,6 +689,15 @@ QStringList MainWindow::SupportedMimeTypes() {
     return mimeTypes;
 }
 
+
+QStringList MainWindow::SupportedUriSchemes() {
+    QStringList schemes;
+    schemes.append("file");
+    schemes.append("http");
+    schemes.append("rstp");
+    return schemes;
+}
+
 void MainWindow::Next() {
     ui->pushButton_2->click();
 }
@@ -722,11 +749,10 @@ QString MainWindow::PlaybackStatus() {
 
 QVariantMap MainWindow::Metadata() {
     //We don't create the metadata map here because it takes too long.
+    mprisMetadataMap.insert("mpris:length", player->totalTime() * 1000);
+    mprisMetadataMap.insert("mpris:trackid", QVariant::fromValue(QDBusObjectPath("/org/thesuite/themedia/track")));
+    mprisMetadataMap.insert("xesam:url", player->currentSource().url().toString());
     return mprisMetadataMap;
-}
-
-float MainWindow::Rate() {
-    return 1.0;
 }
 
 void MainWindow::on_actionScope_triggered()
@@ -734,6 +760,7 @@ void MainWindow::on_actionScope_triggered()
     ui->spacerFrame->setVisualisationType(VisualisationFrame::Scope);
     ui->actionScope->setChecked(true);
     ui->actionLines->setChecked(false);
+    ui->actionCircle->setChecked(false);
 }
 
 void MainWindow::on_actionLines_triggered()
@@ -741,6 +768,15 @@ void MainWindow::on_actionLines_triggered()
     ui->spacerFrame->setVisualisationType(VisualisationFrame::Lines);
     ui->actionScope->setChecked(false);
     ui->actionLines->setChecked(true);
+    ui->actionCircle->setChecked(false);
+}
+
+void MainWindow::on_actionCircle_triggered()
+{
+    ui->spacerFrame->setVisualisationType(VisualisationFrame::Circle);
+    ui->actionScope->setChecked(false);
+    ui->actionLines->setChecked(false);
+    ui->actionCircle->setChecked(true);
 }
 
 void MainWindow::on_spacerFrame_customContextMenuRequested(const QPoint &pos)
@@ -749,5 +785,46 @@ void MainWindow::on_spacerFrame_customContextMenuRequested(const QPoint &pos)
     menu.addSection("Visualization");
     menu.addAction(ui->actionScope);
     menu.addAction(ui->actionLines);
+    menu.addAction(ui->actionCircle);
     menu.exec(ui->spacerFrame->mapToGlobal(pos));
+}
+
+quint64 MainWindow::Position() {
+    return player->currentTime() * 1000;
+}
+
+double MainWindow::Volume() {
+    return 1;
+}
+
+bool MainWindow::CanControl() {
+    return true;
+}
+
+bool MainWindow::CanPlay() {
+    return true;
+}
+
+bool MainWindow::CanPause() {
+    return true;
+}
+
+bool MainWindow::CanGoPrevious() {
+    return true;
+}
+
+bool MainWindow::CanGoNext() {
+    return true;
+}
+
+double MainWindow::Rate() {
+    return 1.0;
+}
+
+double MainWindow::MaximumRate() {
+    return 1.0;
+}
+
+double MainWindow::MinimumRate() {
+    return 1.0;
 }

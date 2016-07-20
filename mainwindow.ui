@@ -508,6 +508,7 @@
      </property>
      <addaction name="actionScope"/>
      <addaction name="actionLines"/>
+     <addaction name="actionCircle"/>
     </widget>
     <addaction name="actionOpen_Media"/>
     <addaction name="actionSave_Playlist"/>
@@ -601,6 +602,14 @@
    </property>
    <property name="text">
     <string>Lines</string>
+   </property>
+  </action>
+  <action name="actionCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Circle</string>
    </property>
   </action>
  </widget>
