@@ -728,3 +728,26 @@ QVariantMap MainWindow::Metadata() {
 float MainWindow::Rate() {
     return 1.0;
 }
+
+void MainWindow::on_actionScope_triggered()
+{
+    ui->spacerFrame->setVisualisationType(VisualisationFrame::Scope);
+    ui->actionScope->setChecked(true);
+    ui->actionLines->setChecked(false);
+}
+
+void MainWindow::on_actionLines_triggered()
+{
+    ui->spacerFrame->setVisualisationType(VisualisationFrame::Lines);
+    ui->actionScope->setChecked(false);
+    ui->actionLines->setChecked(true);
+}
+
+void MainWindow::on_spacerFrame_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu menu;
+    menu.addSection("Visualization");
+    menu.addAction(ui->actionScope);
+    menu.addAction(ui->actionLines);
+    menu.exec(ui->spacerFrame->mapToGlobal(pos));
+}

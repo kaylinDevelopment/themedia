@@ -10,6 +10,8 @@ OpenMedia::OpenMedia(QList<MediaSource>* playlist, QWidget *parent) :
     this->playlist = playlist;
 
     reloadPlaylists();
+
+
 }
 
 OpenMedia::~OpenMedia()

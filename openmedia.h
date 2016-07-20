@@ -7,6 +7,8 @@
 #include <QMenu>
 #include <QMessageBox>
 
+#include <gpod/itdb.h>
+
 using namespace Phonon;
 
 namespace Ui {

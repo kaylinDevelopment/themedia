@@ -9,7 +9,8 @@ CONFIG   += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-LIBS += -lmusicbrainz5 -lX11 -lxcb -lxcb-keysyms -lcdda_interface -lcdda_paranoia
+LIBS += -lmusicbrainz5 -lX11 -lxcb -lxcb-keysyms -lcdda_interface -lcdda_paranoia -lgpod
+INCLUDEPATH += /usr/include/gpod-1.0/ /usr/include/glib-2.0/ /usr/lib/glib-2.0/include/
 
 TARGET = themedia
 TEMPLATE = app

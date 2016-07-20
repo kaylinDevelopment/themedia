@@ -122,6 +122,12 @@ private slots:
 
     void on_actionRemove_from_Playlist_triggered();
 
+    void on_actionScope_triggered();
+
+    void on_actionLines_triggered();
+
+    void on_spacerFrame_customContextMenuRequested(const QPoint &pos);
+
 public Q_SLOTS:
     void Raise();
     void Quit();

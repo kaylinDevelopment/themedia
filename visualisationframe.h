@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QFrame>
 #include <QPainter>
+#include <QtMath>
 
 class VisualisationFrame : public QFrame
 {
@@ -16,7 +17,8 @@ public:
 
     enum visualisationType {
         Scope,
-        Bars
+        Bars,
+        Lines
     };
 
 public slots:
@@ -32,6 +34,7 @@ public:
 
 private:
     QVector<qint16> visualisations;
+    QList<qreal> previousVolumes;
     visualisationType VisType = Scope;
 };
 
