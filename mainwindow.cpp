@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
                 QStringList discid = player->metaData(Phonon::MusicBrainzDiscIdMetaData);
                 if (discid.count() > 0) {
                     QThread *thread = new QThread;
-                    CddbWorker *worker = new CddbWorker(&cddbinfo, discid, this);
+                    CddbWorker *worker = new CddbWorker(&cddbinfo, discid);
                     worker->moveToThread(thread);
                     connect(thread, SIGNAL (started()), worker, SLOT (process()));
                     connect(worker, SIGNAL (finished()), thread, SLOT (quit()));
@@ -259,24 +259,26 @@ void MainWindow::on_controller_titleChanged(int titleNumber) {
 }
 
 void MainWindow::on_controller_availableTitlesChanged(int availableTitles) {
-    if (playlist.first().discType() == Phonon::Cd) {
-        ui->playlistWidget->clear();
+    if (playlist.count() != 0) {
+        if (playlist.first().discType() == Phonon::Cd) {
+            ui->playlistWidget->clear();
 
-        if (cddbinfo.count() == 0) {
-            for (int i = 1; i <= availableTitles; i++) {
-                QListWidgetItem* item = new QListWidgetItem();
-                item->setText("Track " + QString::number(i));
-                item->setIcon(QIcon::fromTheme("media-optical-audio"));
+            if (cddbinfo.count() == 0) {
+                for (int i = 1; i <= availableTitles; i++) {
+                    QListWidgetItem* item = new QListWidgetItem();
+                    item->setText("Track " + QString::number(i));
+                    item->setIcon(QIcon::fromTheme("media-optical-audio"));
 
-                ui->playlistWidget->addItem(item);
-            }
-        } else {
-            for (int i = 1; i <= availableTitles; i++) {
-                QMap<QString, QString> info = cddbinfo.at(i - 1);
-                QListWidgetItem* item = new QListWidgetItem();
-                item->setText("(" + QString::number(i) + ") " + info.value("name"));
-                item->setIcon(QIcon::fromTheme("media-optical-audio"));
-                ui->playlistWidget->addItem(item);
+                    ui->playlistWidget->addItem(item);
+                }
+            } else {
+                for (int i = 1; i <= availableTitles; i++) {
+                    QMap<QString, QString> info = cddbinfo.at(i - 1);
+                    QListWidgetItem* item = new QListWidgetItem();
+                    item->setText("(" + QString::number(i) + ") " + info.value("name"));
+                    item->setIcon(QIcon::fromTheme("media-optical-audio"));
+                    ui->playlistWidget->addItem(item);
+                }
             }
         }
     }

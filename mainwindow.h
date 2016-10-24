@@ -212,4 +212,6 @@ private:
     bool CanGoNext();
 };
 
+Q_DECLARE_METATYPE(QVector<int>)
+
 #endif // MAINWINDOW_H
