@@ -20,8 +20,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-//#include <QMediaPlaylist>
-//#include <QMediaPlayer>
 #include "openmedia.h"
 #include <phonon/MediaObject>
 #include <phonon/AudioOutput>
@@ -49,11 +47,10 @@
 #include <phonon/MediaController>
 #include <phonon/AudioDataOutput>
 #include "cddbworker.h"
-//#include <kaction.h>
-//#include <kshortcut.h>
 #include "importcd.h"
 #include "nativeeventfilter.h"
 #include "mprisdbus.h"
+#include "aboutdialog.h"
 
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
@@ -157,6 +154,8 @@ private slots:
     void on_spacerFrame_customContextMenuRequested(const QPoint &pos);
 
     void on_actionCircle_triggered();
+
+    void on_actionAbout_triggered();
 
 public Q_SLOTS:
     void Raise();

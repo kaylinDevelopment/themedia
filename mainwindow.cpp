@@ -78,7 +78,6 @@ MainWindow::MainWindow(QWidget *parent) :
                     thread->start();
                 }
             }
-
         } else {
             ui->artist->setVisible(true);
             ui->artistImage->setVisible(true);
@@ -130,7 +129,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
             if (showNotification) {
                 QDBusInterface interface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
-                //QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications/", "org.freedesktop.Notifications", "Notify");
 
                 QVariantMap hints;
                 hints.insert("transient", true);
@@ -140,10 +138,6 @@ MainWindow::MainWindow(QWidget *parent) :
                                         QStringList() << hints << (int) -1;
 
                 QDBusMessage message = interface.callWithArgumentList(QDBus::NoBlock, "Notify", args);
-                //QMessageBox::warning(this, "Message", message.errorMessage(), QMessageBox::Ok, QMessageBox::Ok);
-
-                //QSystemTrayIcon* notification = new QSystemTrayIcon(this);
-                //notification->showMessage("theMedia", "Now Playing: " + ui->title->text() + " by " + ui->artist->text());
             }
         }
     });
@@ -398,6 +392,26 @@ void MainWindow::on_player_tick(qint64 time) {
     QTime elapsed(0, 0, 0);
     elapsed = elapsed.addMSecs(time);
     ui->elapsedTime->setText(elapsed.toString("mm:ss"));
+
+    //Send the PropertiesChanged signal.
+    QDBusMessage signal = QDBusMessage::createSignal("/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", "PropertiesChanged");
+
+    QList<QVariant> args;
+    args.append("org.mpris.MediaPlayer2.Player");
+
+    QVariantMap changedProperties;
+    changedProperties.insert("Metadata", this->Metadata());
+    changedProperties.insert("PlaybackStatus", this->PlaybackStatus());
+    args.append(changedProperties);
+
+    QStringList invalidatedProperties;
+    invalidatedProperties.append("Metadata");
+    invalidatedProperties.append("PlaybackStatus");
+    args.append(invalidatedProperties);
+
+    signal.setArguments(args);
+
+    QDBusConnection::sessionBus().send(signal);
 }
 
 void MainWindow::on_player_totalTimeChanged(qint64 time) {
@@ -748,9 +762,9 @@ QString MainWindow::PlaybackStatus() {
 }
 
 QVariantMap MainWindow::Metadata() {
-    //We don't create the metadata map here because it takes too long.
+    //We only insert required metadata map entries here because it takes too long.
     mprisMetadataMap.insert("mpris:length", player->totalTime() * 1000);
-    mprisMetadataMap.insert("mpris:trackid", QVariant::fromValue(QDBusObjectPath("/org/thesuite/themedia/track")));
+    mprisMetadataMap.insert("mpris:trackid", QVariant::fromValue(QDBusObjectPath("/org/thesuite/themedia/track/" + QString::number(qrand()))));
     mprisMetadataMap.insert("xesam:url", player->currentSource().url().toString());
     return mprisMetadataMap;
 }
@@ -827,4 +841,11 @@ double MainWindow::MaximumRate() {
 
 double MainWindow::MinimumRate() {
     return 1.0;
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    AboutDialog* dialog = new AboutDialog(this);
+    dialog->exec();
+    dialog->deleteLater();
 }

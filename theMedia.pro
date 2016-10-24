@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     visualisationframe.cpp \
     importcd.cpp \
     nativeeventfilter.cpp \
-    mprisdbus.cpp
+    mprisdbus.cpp \
+    aboutdialog.cpp
 
 HEADERS  += mainwindow.h \
     openmedia.h \
@@ -33,11 +34,13 @@ HEADERS  += mainwindow.h \
     visualisationframe.h \
     importcd.h \
     nativeeventfilter.h \
-    mprisdbus.h
+    mprisdbus.h \
+    aboutdialog.h
 
 FORMS    += mainwindow.ui \
     openmedia.ui \
-    importcd.ui
+    importcd.ui \
+    aboutdialog.ui
 
 RESOURCES += \
     icons.qrc

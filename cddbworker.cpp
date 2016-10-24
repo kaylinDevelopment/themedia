@@ -77,7 +77,7 @@ void CddbWorker::process() {
 
                     }
             }
-    }
+        }
     } catch (...) {
     }
 

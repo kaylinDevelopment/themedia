@@ -30,27 +30,6 @@
       <item>
        <widget class="QFrame" name="mediaInfoFrame">
         <layout class="QFormLayout" name="formLayout">
-         <item row="1" column="1">
-          <widget class="QLabel" name="artist">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="album">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLabel" name="track">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0" colspan="2">
           <widget class="QLabel" name="title">
            <property name="font">
@@ -70,6 +49,13 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="artist">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="0">
           <widget class="QLabel" name="albumImage">
            <property name="text">
@@ -77,8 +63,22 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="album">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
          <item row="3" column="0">
           <widget class="QLabel" name="trackImage">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="track">
            <property name="text">
             <string/>
            </property>
@@ -504,7 +504,7 @@
     </property>
     <widget class="QMenu" name="menuCurrent_Visualisation">
      <property name="title">
-      <string>Current Visualisation</string>
+      <string>&amp;Current Visualisation</string>
      </property>
      <addaction name="actionScope"/>
      <addaction name="actionLines"/>
@@ -520,7 +520,14 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionExit">
    <property name="icon">
@@ -593,7 +600,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Scope</string>
+    <string>&amp;Scope</string>
    </property>
   </action>
   <action name="actionLines">
@@ -601,7 +608,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Lines</string>
+    <string>&amp;Lines</string>
    </property>
   </action>
   <action name="actionCircle">
@@ -609,7 +616,15 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Circle</string>
+    <string>&amp;Circle</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset theme="help-about"/>
+   </property>
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>
