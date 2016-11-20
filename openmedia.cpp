@@ -73,7 +73,7 @@ void OpenMedia::on_pushButton_clicked()
             }
         }
         break;
-    case 2: //Media Stream
+    case 3: //Media Stream
         {
             MediaSource source(QUrl::fromUserInput(ui->streamUrl->text()));
             playlist->append(source);
