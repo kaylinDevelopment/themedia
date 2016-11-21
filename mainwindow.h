@@ -20,6 +20,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 #include "openmedia.h"
 #include <phonon/MediaObject>
 #include <phonon/AudioOutput>

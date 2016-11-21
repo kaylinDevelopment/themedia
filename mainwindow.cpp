@@ -255,6 +255,21 @@ void MainWindow::on_controller_titleChanged(int titleNumber) {
                 ui->playlistWidget->item(i)->setIcon(QIcon::fromTheme("media-optical-audio"));
             }
         }
+
+
+        //if (showNotification) {
+        {
+            QDBusInterface interface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
+
+            QVariantMap hints;
+            hints.insert("transient", true);
+            QList<QVariant> args;
+            args << "theMedia"<< (uint) 0 << "media-playback-start" << "theMedia" <<
+                                    "Now Playing: " + ui->title->text() + " by " + ui->artist->text() <<
+                                    QStringList() << hints << (int) -1;
+
+            QDBusMessage message = interface.callWithArgumentList(QDBus::NoBlock, "Notify", args);
+        }
     }
 }
 
@@ -430,7 +445,16 @@ void MainWindow::on_pushButton_2_clicked()
 {
     if (playlist.first().type() == MediaSource::Disc) {
         if (playlist.first().discType() == Phonon::Cd) {
-            controller->nextTitle();
+            //Check if we should shuffle or repeat
+            if (ui->repeatButton->isChecked()) {
+                //Don't do anything
+            } else if (ui->shuffleButton->isChecked()) {
+                //Choose a random track
+                controller->setCurrentTitle(qrand() % controller->availableTitles());
+            } else {
+                //Don't shuffle, just go to the next track.
+                controller->nextTitle();
+            }
         } else {
             if (controller->availableChapters() == controller->currentChapter()) {
                 controller->nextTitle();
@@ -438,8 +462,11 @@ void MainWindow::on_pushButton_2_clicked()
                 controller->setCurrentChapter(controller->currentChapter() + 1);
             }
         }
+        //The player stops for some reason so play again
+        player->play();
     } else {
         if (ui->repeatButton->isChecked()) {
+            //Don't do anything
         } else if (ui->shuffleButton->isChecked()) {
             currentPlaylist = qrand() % playlist.count();
         } else {
