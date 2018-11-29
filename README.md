@@ -1,6 +1,6 @@
 # themedia
-Media Player
-
+Media Player.
+theMedia has been discontinued in favour of theBeat. We don't recommend using theMedia unless you really need to. :P
 ## Screenshots
 ![Screenshot 1](https://raw.githubusercontent.com/vicr123/themedia/master/images/screenshot1.png)
 
